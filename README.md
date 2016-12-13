@@ -5,7 +5,7 @@ bitFlyer 自動売買システムのサンプル
 - [NuGet Gallery | BitflyerApi](https://www.nuget.org/packages/BitflyerApi)
 
 ## APIキーについて
-プロジェクト実行の際には https://lightning.bitflyer.jp/developer で API Key, API Secret を取得し、以下の部分に文字列を埋め込んでください。
+プロジェクト実行の際には https://lightning.bitflyer.jp/developer で API Key, API Secret を取得し、以下の ```xxxxxxx``` の部分に文字列を埋め込んでください。
 
 ```cs
 client = new BitflyerClient(
