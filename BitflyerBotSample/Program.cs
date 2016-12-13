@@ -1,7 +1,9 @@
 ﻿using BitflyerApi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,8 +36,46 @@ namespace BitflyerBotSample
             }).Wait(); // タスクが終わるまで待つ
         }
 
-        // 相場の変動が大きく変動したときに売買を行うボット
+        // 天気によって売買を判断するボット
         static async Task BotLogic()
+        {
+            // 東京の今日の天気
+            string url = "http://weather.livedoor.com/forecast/webservice/json/v1?city=130010";
+            HttpClient httpClient = new HttpClient();
+            string json = await httpClient.GetStringAsync(url);
+            var data = JsonConvert.DeserializeObject<dynamic>(json);
+            string telop = data.forecasts[0].telop;
+
+            // ログ
+            Console.WriteLine("東京の今日の天気: " + telop);
+
+            // 晴れっぽい天気なら買う
+            if (telop.IndexOf("晴") >= 0)
+            {
+                Console.WriteLine("buy");
+                await client.Buy(0.001);
+            }
+            // それ以外なら建玉を手じまいする
+            else
+            {
+                Console.WriteLine("leave all positions");
+                var positions = await client.GetMyPositions();
+                foreach(var p in positions)
+                {
+                    if(p.Side== OrderSide.BUY)
+                    {
+                        await client.Sell(p.Size);
+                    }
+                    else if(p.Side== OrderSide.SELL)
+                    {
+                        await client.Buy(p.Size);
+                    }
+                }
+            }
+        }
+
+        // 相場の変動が大きく変動したときに売買を行うボット
+        static async Task BotLogicBoard()
         {
             // 1分毎にチェック
             double lastPrice = 0;
